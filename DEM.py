@@ -26,7 +26,7 @@ def animate(img):
     plt.show()
 
 def response(resp, lgt):
-    suvi_labels = [r'$94\,\,\AA$',r'$131\,\,\AA$',r'$171\,\,\AA$',r'$195\,\,\AA$', r'$284\,\,\AA$', r'$304\,\,\AA$']
+    suvi_labels=[r'$94\,\,\AA$',r'$131\,\,\AA$',r'$171\,\,\AA$',r'$195\,\,\AA$', r'$284\,\,\AA$', r'$304\,\,\AA$']
 
     fig,ax = plt.subplots(figsize=(10, 8))
 
@@ -110,7 +110,8 @@ def DEM_solve(img, Dict, lgtaxis, tolfac, locations):
     B = np.zeros(8)
     nimg = np.empty((1280, 1280, 4))
 
-    X, Y = np.meshgrid(np.arange(-int(len(img[0,:,0]))/2, int(len(img[0,0,:])/2)), np.arange(-int(len(img[0,:,0]))/2, int(len(img[0,0,:])/2))) 
+    X, Y = np.meshgrid(np.arange(-int(len(img[0,:,0]))/2, int(len(img[0,0,:])/2)), 
+                       np.arange(-int(len(img[0,:,0]))/2, int(len(img[0,0,:])/2))) 
     xsi, ysi = np.where(np.hypot(X,Y) < 50)
     xyzip = list(zip_longest(xsi, ysi))
     for i, j in xyzip:
@@ -175,15 +176,22 @@ def DEM_solve(img, Dict, lgtaxis, tolfac, locations):
     newtolfac = 1.5*tolfac
     return(oem, nimg)
 
-############# Main ############
+# ############ Main ############
 
 demdata = pd.read_csv('suvi_trf_rad.txt', delimiter = ' \t ', engine = "python")
+print(demdata.keys())
 demdata.columns = [0, 1, 2, 3, 4, 5, 6] #reassigns the column titles by their indicies 
+print(demdata.keys())
 
-lgt = list(map(lambda x: np.log10(x), list(demdata[0][x] for x in list(map(lambda x: x*4 + 72, np.arange(0, 21)))))) 
+lgt=list(map(lambda x: np.log10(x), list(demdata[0][x] for x in list(map(lambda x: x*4 + 72, np.arange(0,21)))))) 
 
-#print('graphing SUVI response functions')
-#response([demdata[1].tolist(), demdata[2].tolist(), demdata[3].tolist(), demdata[4].tolist(), demdata[5].tolist(), demdata[6].tolist()], list(map(lambda x: np.log10(x), demdata[0]))) 
+print('graphing SUVI response functions')
+response([demdata[1].tolist(),
+          demdata[2].tolist(), 
+          demdata[3].tolist(), 
+          demdata[4].tolist(), 
+          demdata[5].tolist(), 
+          demdata[6].tolist()],list(map(lambda x: np.log10(x), demdata[0]))) 
 
 resp = np.zeros((21, 4))
 for i in range(4): 
@@ -193,17 +201,20 @@ for i in range(4):
 locations = 0
 Dict = linear_alg(resp, lgt) # [63, 4] matrix
 
-img94, img131, img171, img195 = fits.open('SUVI_Composite_094_2017_09_10.fits'), fits.open('SUVI_Composite_131_2017_09_10.fits'), fits.open('SUVI_Composite_171_2017_09_10.fits'), fits.open('SUVI_Composite_195_2017_09_10.fits')
-    
+img94  = fits.open('SUVI_Composite_094_2017_09_10.fits')
+img131 = fits.open('SUVI_Composite_131_2017_09_10.fits')
+img171 = fits.open('SUVI_Composite_171_2017_09_10.fits')
+img195 = fits.open('SUVI_Composite_195_2017_09_10.fits')
+
 img = np.array([img94[0].data*100, img131[0].data*100, img171[0].data*100, img195[0].data*100])
 
-tolfac = 1.4
+tolfac = 0.1
 em, nimg  = DEM_solve(img, Dict, lgt, tolfac, locations)
 
 for ik in range(4):
-    fig = plt.figure()
+    fig = plt.figure(figsize=(10,6),dpi=80)
     ax1 = fig.add_subplot(121)
-    cax1 = ax1.imshow(img[ik, :, :]**0.25, origin='lower', cmap='jet')
+    cax1 = ax1.imshow(img[ik, :, :]**0.25, origin='lower', cmap='hot')
     ax2 = fig.add_subplot(122)
     cax2 = ax2.imshow(nimg[:, :, ik]**0.25, origin='lower', cmap='jet')
     #ax1.set_title('Observed {}'.format(fwvs[ik]))
@@ -211,9 +222,12 @@ for ik in range(4):
     ax1.set_xticklabels([])
     ax1.set_yticklabels([])
     ax2.set_xticklabels([])
+    ax2.set_xlim(640-60,640+60)
     ax2.set_yticklabels([])
+    ax2.set_ylim(640-60,640+60)
     fig.colorbar(cax1, ax = ax1)
     fig.colorbar(cax2, ax = ax2)
     plt.show()
 
+# +
 #animate(em)
