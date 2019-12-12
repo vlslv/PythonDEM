@@ -8,6 +8,7 @@ from operator import sub
 from scipy import optimize
 from itertools import zip_longest
 import matplotlib.animation as animation
+import sys
 
 #global variables
 nchannels = 0
@@ -52,7 +53,7 @@ def response(resp, lgt):
 def linear_alg(resp, lgtaxis):
     global nchannels
     global basis_funcs
-    np.set_printoptions(threshold = np.nan)
+    np.set_printoptions(threshold = sys.maxsize) ## replace np.nan, by vlslv on Dec 12, 2019 
     basis_sigmas = [0, 0.1, 0.2] 
     rnge = lgtaxis[1]-lgtaxis[0]
     emunit = 1e27
@@ -199,21 +200,20 @@ img = np.array([img94[0].data*100, img131[0].data*100, img171[0].data*100, img19
 tolfac = 1.4
 em, nimg  = DEM_solve(img, Dict, lgt, tolfac, locations)
 
-# for ik in range(4):
-        
-#     fig = plt.figure()
-#     ax1 = fig.add_subplot(121)
-#     cax1 = ax1.imshow(img[ik, :, :]**0.25, origin='lower', cmap='jet')
-#     ax2 = fig.add_subplot(122)
-#     cax2 = ax2.imshow(nimg[:, :, ik]**0.25, origin='lower', cmap='jet')
-#     #ax1.set_title('Observed {}'.format(fwvs[ik]))
-#     #ax2.set_title('Simulated {}'.format(fwvs[ik]))
-#     ax1.set_xticklabels([])
-#     ax1.set_yticklabels([])
-#     ax2.set_xticklabels([])
-#     ax2.set_yticklabels([])
-#     fig.colorbar(cax1, ax = ax1)
-#     fig.colorbar(cax2, ax = ax2)
-#     plt.show()
+for ik in range(4):
+    fig = plt.figure()
+    ax1 = fig.add_subplot(121)
+    cax1 = ax1.imshow(img[ik, :, :]**0.25, origin='lower', cmap='jet')
+    ax2 = fig.add_subplot(122)
+    cax2 = ax2.imshow(nimg[:, :, ik]**0.25, origin='lower', cmap='jet')
+    #ax1.set_title('Observed {}'.format(fwvs[ik]))
+    #ax2.set_title('Simulated {}'.format(fwvs[ik]))
+    ax1.set_xticklabels([])
+    ax1.set_yticklabels([])
+    ax2.set_xticklabels([])
+    ax2.set_yticklabels([])
+    fig.colorbar(cax1, ax = ax1)
+    fig.colorbar(cax2, ax = ax2)
+    plt.show()
 
-animate(em)
+#animate(em)
