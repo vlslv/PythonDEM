@@ -14,7 +14,7 @@ import sys
 nchannels = 0
 basis_funcs = []
 
-def animate(img):
+def animate(em):
     fig = plt.figure()
 
     imlist = []
